@@ -1,0 +1,40 @@
+import cairo
+import numpy as np
+
+mod = 100
+mult = 5
+
+size = (500,) * 2
+center = (size[0] // 2,) * 2
+start_vec = np.array([0, -(center[0] - 10)])
+
+
+def get_coords_for_num(num):
+    angle = ((2.0 * np.pi) / (mod)) * num
+    sin = np.sin(angle)
+    cos = np.cos(angle)
+    m = np.array([[cos, -sin], [sin, cos]])
+    vec = np.matmul(m, start_vec)
+
+    return vec + center
+
+
+with cairo.ImageSurface(cairo.Format.ARGB32, *size) as surface:
+    context = cairo.Context(surface)
+    context.set_line_width(1)
+
+    for num in range(0, mod):
+        context.set_source_rgb(1, 1, 1)
+
+        rem = (num * mult) % mod
+
+        start_coords = get_coords_for_num(num)
+        context.move_to(start_coords[0], start_coords[1])
+
+        end_coords = get_coords_for_num(rem)
+        context.line_to(end_coords[0], end_coords[1])
+        context.stroke()
+
+    circ_str = f'mod_{mod}_mult_{mult}'
+    surface.write_to_png(f'complete_circle_{circ_str}.png')
+
